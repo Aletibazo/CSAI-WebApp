@@ -1,26 +1,76 @@
-from flask import Flask, render_template, json, request
-from flask.ext.mysql import MySQL
+from flask import Flask, render_template, json, request, session, redirect
+from flaskext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
+import hashlib
 
 mysql = MySQL()
 app = Flask(__name__)
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'jay'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'jay'
-app.config['MYSQL_DATABASE_DB'] = 'BucketList'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = 'dba'
+app.config['MYSQL_DATABASE_PASSWORD'] = ',K6Tr)TD'
+app.config['MYSQL_DATABASE_DB'] = 'maestros'
+app.config['MYSQL_DATABASE_HOST'] = '192.168.0.169'
 mysql.init_app(app)
+
+app.secret_key = '"g@d94p2vFfE2Gd@jK#8k$pL`VLY6LM]aj+"k@/F*:wRPH-Gy/7<>$/T`}gP{w<5SG`ZLg=c#[FD7LV^AG%+9ug`ug~CvU`C.U*)7w[^~J#gV&V@Z9D8G~W-C/d,[>'
 
 
 @app.route('/')
 def main():
     return render_template('index.html')
 
+@app.route('/showSignIn')
+def showSignIn():
+    return render_template('signin.html')
+
 @app.route('/showSignUp')
 def showSignUp():
     return render_template('signup.html')
 
+@app.route('/products')
+def showProducts():
+    if session.get('user'):
+        return render_template('products.html')
+    else:
+        return render_template('error.html', error = 'Acceso no permitido')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/')
+
+@app.route('/signIn',methods=['POST','GET'])
+def signIn():
+    try:
+        _username = request.form['signinUsername']
+        _password = request.form['signinPassword']
+        _hashed_password = hashlib.sha256(_password)
+      
+        if _username and _password:
+
+            db = mysql.connect()
+            cursor = db.cursor()
+
+            query = "SELECT password FROM usuario WHERE username = %s"
+            cursor.execute(query, (_username,))
+
+            (data,) = cursor.fetchone()
+
+            if (data.lower() == _hashed_password.hexdigest().lower()):
+                session['user'] = data
+                return json.dumps({'html':'<span>Password correcta</span>'})
+            else:
+                return json.dumps({'html':'<span>Password incorrecta</span>'})
+
+        else:
+            return json.dumps({'html':'<span>Enter the required fields</span>'}) 
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+    finally:
+        cursor.close() 
+        db.close()
 
 @app.route('/signUp',methods=['POST','GET'])
 def signUp():
