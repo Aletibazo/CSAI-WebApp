@@ -7,10 +7,10 @@ mysql = MySQL()
 app = Flask(__name__)
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'dba'
-app.config['MYSQL_DATABASE_PASSWORD'] = ',K6Tr)TD'
+app.config['MYSQL_DATABASE_USER'] = 'db'
+app.config['MYSQL_DATABASE_PASSWORD'] = '%MMjW9gp'
 app.config['MYSQL_DATABASE_DB'] = 'maestros'
-app.config['MYSQL_DATABASE_HOST'] = '192.168.0.169'
+app.config['MYSQL_DATABASE_HOST'] = '127.0.0.1'
 mysql.init_app(app)
 
 app.secret_key = '"g@d94p2vFfE2Gd@jK#8k$pL`VLY6LM]aj+"k@/F*:wRPH-Gy/7<>$/T`}gP{w<5SG`ZLg=c#[FD7LV^AG%+9ug`ug~CvU`C.U*)7w[^~J#gV&V@Z9D8G~W-C/d,[>'
@@ -46,7 +46,7 @@ def signIn():
         _username = request.form['signinUsername']
         _password = request.form['signinPassword']
         _hashed_password = hashlib.sha256(_password)
-      
+
         if _username and _password:
 
             db = mysql.connect()
@@ -69,7 +69,7 @@ def signIn():
     except Exception as e:
         return json.dumps({'error':str(e)})
     finally:
-        cursor.close() 
+        cursor.close()
         db.close()
 
 @app.route('/signUp',methods=['POST','GET'])
@@ -81,9 +81,9 @@ def signUp():
 
         # validate the received values
         if _name and _email and _password:
-            
+
             # All Good, let's call MySQL
-            
+
             conn = mysql.connect()
             cursor = conn.cursor()
             _hashed_password = generate_password_hash(_password)
